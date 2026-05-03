@@ -8,8 +8,6 @@
 body {
   margin:0;
   font-family:'Segoe UI';
-
-  /* 🇮🇳 Brighter Gradient */
   background: linear-gradient(135deg,#ff9933,#fff5e6,#138808);
   color:#1f2937;
 }
@@ -47,54 +45,57 @@ header {
 }
 
 .navbar button {
-  padding:10px 15px;
+  background:#d97706;
+  color:white;
+  font-weight:bold;
   border:none;
+  padding:10px 15px;
   border-radius:10px;
-  background:#ffb366;
   cursor:pointer;
 }
 
 /* CONTROLS */
 .controls {
   text-align:center;
-  margin:15px;
+  margin:20px;
+}
+
+.controls select {
+  padding:10px;
+  border-radius:8px;
 }
 
 /* GRID */
 .grid {
   display:grid;
-  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
+  grid-template-columns: repeat(4,1fr);
   gap:15px;
   padding:20px;
 }
 
 .card {
-  background: rgba(255,255,255,0.85);
+  background:#1e3a8a;
+  color:white;
   padding:15px;
-  border-radius:14px;
+  border-radius:12px;
   text-align:center;
   cursor:pointer;
-  transition:0.3s;
-}
-
-.card:hover {
-  transform:scale(1.05);
+  font-weight:bold;
 }
 
 /* PANEL */
 .panel {
-  background:white;
+  background:#064e3b;
+  color:white;
   margin:20px;
   padding:25px;
   border-radius:16px;
   line-height:1.6;
 }
 
-/* BUTTON */
-button {
-  padding:10px;
-  margin:5px;
-  border-radius:8px;
+a {
+  color:#facc15;
+  font-weight:bold;
 }
 </style>
 
@@ -102,7 +103,7 @@ button {
 
 <body>
 
-<header>🌍 AIForAll — Explore AI Confidently</header>
+<header>🌍 AIForAll — Global AI Explorer</header>
 
 <div class="navbar">
 <button onclick="goBack()">⬅ Back</button>
@@ -111,14 +112,15 @@ button {
 </div>
 
 <div class="controls">
-<select id="goal">
-<option>Writing</option>
-<option>Coding</option>
-<option>Research</option>
-<option>Design</option>
-<option>Presentation</option>
+<h3>What do you need AI help with?</h3>
+<select id="goal" onchange="recommend()">
+<option value="all">All</option>
+<option value="writing">Writing</option>
+<option value="coding">Coding</option>
+<option value="research">Research</option>
+<option value="design">Design</option>
+<option value="video">Video</option>
 </select>
-<button onclick="recommend()">Find Tools</button>
 </div>
 
 <div id="grid" class="grid"></div>
@@ -127,43 +129,23 @@ button {
 
 <script>
 
-// DATA
+// DATASET (GLOBAL)
 const tools = [
-{
-name:"ChatGPT",
-cat:"writing",
-link:"https://chat.openai.com",
-desc:"ChatGPT is an advanced AI assistant capable of writing, coding, researching, and solving complex problems in a conversational way.",
-best:"Best for writing, studying, coding help, and productivity.",
-free:"The free version allows users to chat, write essays, summarize text, and get basic coding help.",
-limit:"Limited access to advanced models and slower performance during peak usage.",
-paid:"The paid version (~₹1600/month) unlocks faster responses, advanced models, image generation, and higher accuracy.",
-why:"Upgrading to the paid version of ChatGPT significantly improves both speed and capability. Users get access to more advanced AI models that produce better reasoning, more accurate outputs, and richer responses. Additionally, features like image generation, file uploads, and deeper analysis tools become available. For professionals, students, and creators, this translates to saving time and producing higher-quality work. If you rely on AI frequently for research, writing, or coding, the paid plan becomes a powerful productivity multiplier."
-},
+{name:"ChatGPT",cat:"writing",link:"https://chat.openai.com",desc:"Advanced AI assistant for writing, coding and more.",best:"Writing, coding, research",free:"Basic chat and writing",limit:"Limited advanced features",paid:"₹1600/month unlocks advanced AI, faster speed, image tools",why:"The paid version dramatically improves performance, enabling better reasoning, faster outputs, and access to premium features like image generation and file uploads."},
 
-{
-name:"Claude",
-cat:"writing",
-link:"https://claude.ai",
-desc:"Claude is an AI focused on natural writing and deep understanding of large documents.",
-best:"Best for long-form writing, document analysis, and professional communication.",
-free:"Free version allows writing, summaries, and document interaction.",
-limit:"Fewer integrations and features compared to competitors.",
-paid:"Paid plan improves context size and response quality.",
-why:"Claude’s paid version is particularly valuable for users working with large documents such as reports, contracts, or research papers."
-},
+{name:"Claude",cat:"writing",link:"https://claude.ai",desc:"AI for deep writing and analysis.",best:"Long documents",free:"Basic writing",limit:"Fewer integrations",paid:"₹1600/month for better context",why:"Claude shines for long documents and deep analysis, making the upgrade useful for professionals."},
 
-{
-name:"Perplexity",
-cat:"research",
-link:"https://perplexity.ai",
-desc:"Perplexity is an AI-powered search engine that provides direct answers with sources.",
-best:"Best for research and fact-checking.",
-free:"Basic research queries with citations.",
-limit:"Limited deep research capabilities.",
-paid:"Pro plan unlocks deeper search and better models.",
-why:"The paid version enhances research depth, making it ideal for analysts and students."
-}
+{name:"Perplexity",cat:"research",link:"https://perplexity.ai",desc:"AI search engine with sources.",best:"Research",free:"Basic answers",limit:"Limited deep queries",paid:"₹1600/month for pro research",why:"The pro version provides deeper insights and better source-backed answers."},
+
+{name:"Midjourney",cat:"design",link:"https://midjourney.com",desc:"AI image generator.",best:"Creative visuals",free:"No free tier",limit:"Paid only",paid:"₹800/month",why:"Delivers unmatched artistic quality for designers."},
+
+{name:"Gemini",cat:"writing",link:"https://gemini.google.com",desc:"Google AI assistant.",best:"General tasks",free:"Basic usage",limit:"Inconsistent",paid:"₹1600/month",why:"Integrates well with Google ecosystem."},
+
+{name:"Qwen",cat:"writing",link:"#",desc:"Alibaba AI model.",best:"General AI",free:"Free",limit:"UI limited",paid:"Free",why:"Good alternative free AI."},
+
+{name:"ERNIE",cat:"research",link:"#",desc:"Baidu AI system.",best:"Search",free:"Free",limit:"Region locked",paid:"Free",why:"Useful for Chinese ecosystem."},
+
+{name:"Kling",cat:"video",link:"#",desc:"AI video generator.",best:"Video",free:"Limited",limit:"Restricted",paid:"₹1200/month",why:"Great for creators."}
 ];
 
 // STATE
@@ -215,6 +197,7 @@ state={view:"detail",tool:i};
 render();
 }
 
+// RENDER
 function render(){
 
 document.getElementById("grid").style.display="none";
@@ -227,11 +210,10 @@ renderGrid(tools);
 
 if(state.view==="detail"){
 let t=tools[state.tool];
-document.getElementById("detail").style.display="block";
 
+document.getElementById("detail").style.display="block";
 document.getElementById("detail").innerHTML=`
 <h2>${t.name}</h2>
-
 <a href="${t.link}" target="_blank">🚀 Open Tool</a>
 
 <h3>What is it?</h3>
@@ -255,10 +237,11 @@ document.getElementById("detail").innerHTML=`
 }
 }
 
-// RECOMMEND
+// FILTER
 function recommend(){
-let goal=document.getElementById("goal").value.toLowerCase();
-renderGrid(tools.filter(t=>t.cat===goal));
+let val=document.getElementById("goal").value;
+if(val==="all") renderGrid(tools);
+else renderGrid(tools.filter(t=>t.cat===val));
 }
 
 // INIT
