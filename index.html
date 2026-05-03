@@ -2,118 +2,81 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>AI Tools Intelligence Platform</title>
+<title>AIForAll — AI Tools Intelligence Platform</title>
 
 <style>
-body {margin:0; font-family:'Segoe UI'; background:#0f172a; color:#e2e8f0;}
-header {background:#020617; padding:15px; border-bottom:1px solid #1e293b;}
-.container {display:flex; height:100vh;}
-
-.sidebar {
-  width:260px;
-  background:#020617;
-  padding:20px;
-  border-right:1px solid #1e293b;
-}
-
-.sidebar button, .sidebar select {
-  width:100%;
-  margin:5px 0;
-  padding:8px;
-  border:none;
-  border-radius:6px;
-  background:#1e293b;
-  color:#fff;
-}
-
-.content {flex:1; padding:20px; overflow-y:auto;}
-
-.card {
-  background:#020617;
-  padding:15px;
-  margin:10px 0;
-  border-radius:10px;
-  border:1px solid #1e293b;
-}
-
-.tag {
-  background:#1e293b;
-  padding:3px 6px;
-  margin:3px;
-  display:inline-block;
-  border-radius:4px;
-}
-
-.score {
-  float:right;
-  background:#22c55e;
-  padding:4px 8px;
-  border-radius:5px;
-}
-
-canvas {margin-top:10px;}
+body {margin:0;font-family:Segoe UI;background:#0f172a;color:#e2e8f0;}
+header {background:#020617;padding:15px;font-size:20px;font-weight:bold;}
+.container{display:flex;height:100vh;}
+.sidebar{width:280px;background:#020617;padding:20px;border-right:1px solid #1e293b;overflow:auto;}
+.content{flex:1;padding:20px;overflow:auto;}
+button,select,input{width:100%;margin:6px 0;padding:8px;border-radius:6px;border:none;background:#1e293b;color:white;}
+.card{background:#020617;padding:15px;margin:10px 0;border-radius:10px;border:1px solid #1e293b;}
+.score{float:right;background:#22c55e;padding:4px 8px;border-radius:5px;}
+.tag{background:#1e293b;padding:3px 6px;margin:3px;border-radius:4px;display:inline-block;}
+a{color:#38bdf8;text-decoration:none;}
 </style>
 
 </head>
-
 <body>
 
-<header>
-AI Tools Intelligence Platform
-</header>
+<header>AIForAll — AI Intelligence Platform (2026)</header>
 
 <div class="container">
 
-<!-- SIDEBAR -->
 <div class="sidebar">
 
 <h3>User</h3>
 <button onclick="login()">Login</button>
 <button onclick="logout()">Logout</button>
-<div id="userInfo">Not logged in</div>
+<div id="userInfo"></div>
 
-<h3>Smart Recommendations</h3>
+<h3>Search</h3>
+<input id="search" placeholder="Search tools..." oninput="searchTools()">
 
+<h3>Filter</h3>
+<select id="category">
+<option value="all">All</option>
+<option value="image">Image</option>
+<option value="coding">Coding</option>
+<option value="productivity">Productivity</option>
+<option value="presentation">Presentation</option>
+<option value="video">Video</option>
+</select>
+<button onclick="applyFilter()">Apply</button>
+
+<h3>Recommend</h3>
 <select id="goal">
 <option value="content">Content</option>
 <option value="coding">Coding</option>
 <option value="research">Research</option>
 <option value="design">Design</option>
 </select>
+<button onclick="recommend()">Get AI Picks</button>
+<div id="recommendations"></div>
 
-<select id="level">
-<option value="beginner">Beginner</option>
-<option value="pro">Professional</option>
-</select>
-
-<select id="budget">
-<option value="free">Free</option>
-<option value="paid">Paid</option>
-</select>
-
-<button onclick="smartRecommend()">Get Recommendations</button>
-
-<div id="results"></div>
-
-<h3>Saved</h3>
-<button onclick="viewSaved()">View Saved Tools</button>
-<div id="savedList"></div>
+<h3>Actions</h3>
+<button onclick="downloadCSV()">Download CSV</button>
+<button onclick="window.print()">Download PDF</button>
 
 </div>
 
-<!-- CONTENT -->
 <div class="content">
 
-<h2>AI Tools Dashboard</h2>
+<h2>Dashboard</h2>
+<button onclick="sortByScore()">Sort by Score</button>
+<button onclick="sortByPrice()">Sort by Price</button>
 
-<div>
-<button onclick="sortBy('score')">Sort by Score</button>
-<button onclick="sortBy('name')">Sort by Name</button>
-</div>
-
-<canvas id="chart" width="600" height="300"></canvas>
+<canvas id="chart" width="700" height="300"></canvas>
 
 <div id="tools"></div>
+
+<h2>Insights</h2>
+<div class="card">
+<p><b>Trend:</b> AI tools are shifting toward multi-modal + agent workflows.</p>
+<p><b>Insight:</b> Free tools offer 80% capability for beginners.</p>
+<p><b>Recommendation:</b> Use ChatGPT + Perplexity combo for max value.</p>
+</div>
 
 </div>
 
@@ -121,137 +84,119 @@ AI Tools Intelligence Platform
 
 <script>
 
-// ================= LOGIN (SIMPLE) =================
+// ===== LOGIN =====
 function login(){
-  let name = prompt("Enter your name:");
-  if(name){
-    localStorage.setItem("user", JSON.stringify({displayName:name}));
-    updateUser();
-  }
+let name=prompt("Enter your name");
+if(name){localStorage.setItem("user",name);updateUser();}
 }
-
-function logout(){
-  localStorage.removeItem("user");
-  updateUser();
-}
-
+function logout(){localStorage.removeItem("user");updateUser();}
 function updateUser(){
-  let user = JSON.parse(localStorage.getItem("user"));
-  document.getElementById("userInfo").innerText =
-    user ? "👤 " + user.displayName : "Not logged in";
+let u=localStorage.getItem("user");
+document.getElementById("userInfo").innerText=u?"👤 "+u:"Not logged in";
 }
 
-// ================= DATA =================
-const tools = [
-{name:"ChatGPT", category:"productivity", score:92, free:true, best_for:["content","research"]},
-{name:"Claude", category:"productivity", score:90, free:true, best_for:["content"]},
-{name:"Perplexity", category:"productivity", score:88, free:true, best_for:["research"]},
-{name:"Midjourney", category:"image", score:89, free:false, best_for:["design"]},
-{name:"Cursor", category:"coding", score:91, free:false, best_for:["coding"]}
+// ===== DATA =====
+const tools=[
+{name:"ChatGPT",cat:"productivity",price:20,free:true,feat:95,ease:90,perf:95,innov:95,best:["content","research"],link:"https://chat.openai.com"},
+{name:"Claude",cat:"productivity",price:20,free:true,feat:92,ease:92,perf:94,innov:90,best:["content"],link:"https://claude.ai"},
+{name:"Perplexity",cat:"productivity",price:20,free:true,feat:88,ease:90,perf:90,innov:88,best:["research"],link:"https://perplexity.ai"},
+{name:"Midjourney",cat:"image",price:10,free:false,feat:95,ease:70,perf:96,innov:90,best:["design"],link:"https://midjourney.com"},
+{name:"Ideogram",cat:"image",price:0,free:true,feat:90,ease:88,perf:90,innov:85,best:["design"],link:"https://ideogram.ai"},
+{name:"Cursor",cat:"coding",price:20,free:false,feat:95,ease:88,perf:95,innov:92,best:["coding"],link:"https://cursor.sh"},
+{name:"Copilot",cat:"coding",price:10,free:false,feat:92,ease:92,perf:94,innov:90,best:["coding"],link:"https://github.com/copilot"},
+{name:"Canva AI",cat:"presentation",price:10,free:true,feat:90,ease:95,perf:88,innov:85,best:["design"],link:"https://canva.com"},
+{name:"Gamma",cat:"presentation",price:8,free:true,feat:88,ease:90,perf:85,innov:85,best:["content"],link:"https://gamma.app"},
+{name:"Veo 3.1",cat:"video",price:0,free:true,feat:92,ease:85,perf:90,innov:92,best:["design"],link:"#"}
 ];
 
-let currentTools = [...tools];
+// ===== SCORE =====
+function score(t){
+return Math.round(t.feat*0.3+(t.free?100:70)*0.2+(100-t.price*2)*0.15+t.ease*0.1+t.perf*0.15+t.innov*0.1);
+}
+tools.forEach(t=>t.score=score(t));
 
-// ================= RENDER =================
+let current=[...tools];
+
+// ===== RENDER =====
 function render(list){
 let html="";
 list.forEach(t=>{
-html+=`
-<div class="card">
+html+=`<div class="card">
 <span class="score">${t.score}</span>
-<h3>${t.name}</h3>
-<div>
-${t.best_for.map(tag=>`<span class="tag">${tag}</span>`).join("")}
-</div>
-</div>
-`;
+<h3><a href="${t.link}" target="_blank">${t.name}</a></h3>
+${t.best.map(b=>`<span class="tag">${b}</span>`).join("")}
+<p>$${t.price}/mo</p>
+<button onclick="save('${t.name}')">⭐ Save</button>
+</div>`;
 });
 document.getElementById("tools").innerHTML=html;
+drawChart(list);
 }
 
-// ================= SORT =================
-function sortBy(type){
-if(type==="score") currentTools.sort((a,b)=>b.score-a.score);
-if(type==="name") currentTools.sort((a,b)=>a.name.localeCompare(b.name));
-render(currentTools);
-drawChart(currentTools);
-}
-
-// ================= CHART =================
+// ===== CHART =====
 function drawChart(list){
-let ctx = document.getElementById("chart").getContext("2d");
-ctx.clearRect(0,0,600,300);
-
-let max = Math.max(...list.map(t=>t.score));
-
+let c=document.getElementById("chart").getContext("2d");
+c.clearRect(0,0,700,300);
+let max=Math.max(...list.map(t=>t.score));
 list.forEach((t,i)=>{
-let x=i*100+40;
+let x=i*80+20;
 let h=(t.score/max)*200;
-
-ctx.fillStyle="#38bdf8";
-ctx.fillRect(x,250-h,50,h);
-
-ctx.fillStyle="#fff";
-ctx.fillText(t.name,x,270);
+c.fillStyle="#38bdf8";
+c.fillRect(x,250-h,40,h);
+c.fillText(t.name,x,270);
 });
 }
 
-// ================= SMART RECOMMEND =================
-function smartRecommend(){
+// ===== FILTER =====
+function applyFilter(){
+let cat=document.getElementById("category").value;
+current=cat==="all"?tools:tools.filter(t=>t.cat===cat);
+render(current);
+}
+
+// ===== SEARCH =====
+function searchTools(){
+let q=document.getElementById("search").value.toLowerCase();
+render(tools.filter(t=>t.name.toLowerCase().includes(q)));
+}
+
+// ===== SORT =====
+function sortByScore(){current.sort((a,b)=>b.score-a.score);render(current);}
+function sortByPrice(){current.sort((a,b)=>a.price-b.price);render(current);}
+
+// ===== RECOMMEND =====
+function recommend(){
 let goal=document.getElementById("goal").value;
-let level=document.getElementById("level").value;
-let budget=document.getElementById("budget").value;
-
-let scored = tools.map(t=>{
-let score=0;
-score+=t.score*0.4;
-if(t.best_for.includes(goal)) score+=30;
-if(budget==="free" && t.free) score+=20;
-if(level==="beginner" && t.free) score+=10;
-if(level==="pro" && !t.free) score+=10;
-return {...t, finalScore:Math.round(score)};
-});
-
-scored.sort((a,b)=>b.finalScore-a.finalScore);
-
-let top=scored.slice(0,3);
+let ranked=tools.map(t=>{
+let s=t.score+(t.best.includes(goal)?20:0);
+return {...t,final:s};
+}).sort((a,b)=>b.final-a.final);
 
 let html="<h4>Top Picks</h4>";
-top.forEach(t=>{
-html+=`
-<div class="card">
-<b>${t.name}</b><br>
-Score: ${t.finalScore}<br>
-<button onclick="saveTool('${t.name}')">Save</button>
-</div>
-`;
-});
-
-document.getElementById("results").innerHTML=html;
+ranked.slice(0,3).forEach(t=>html+=`<p>${t.name} (${t.final})</p>`);
+document.getElementById("recommendations").innerHTML=html;
 }
 
-// ================= SAVE =================
-function saveTool(name){
-let saved=JSON.parse(localStorage.getItem("savedTools"))||[];
-if(!saved.includes(name)){
-saved.push(name);
-localStorage.setItem("savedTools",JSON.stringify(saved));
-alert("Saved!");
-}
+// ===== SAVE =====
+function save(name){
+let s=JSON.parse(localStorage.getItem("saved")||"[]");
+if(!s.includes(name)){s.push(name);localStorage.setItem("saved",JSON.stringify(s));alert("Saved");}
 }
 
-// ================= VIEW SAVED =================
-function viewSaved(){
-let saved=JSON.parse(localStorage.getItem("savedTools"))||[];
-let html="<h4>Saved Tools</h4>";
-saved.forEach(n=> html+=`<p>${n}</p>`);
-document.getElementById("savedList").innerHTML=html;
+// ===== CSV =====
+function downloadCSV(){
+let csv="Name,Category,Score\n";
+tools.forEach(t=>csv+=`${t.name},${t.cat},${t.score}\n`);
+let blob=new Blob([csv]);
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download="ai-tools.csv";
+a.click();
 }
 
-// ================= INIT =================
+// INIT
 updateUser();
-render(currentTools);
-drawChart(currentTools);
+render(current);
 
 </script>
 
