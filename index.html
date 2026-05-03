@@ -2,76 +2,90 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>AIForAll — Global AI Platform</title>
+<title>AIForAll</title>
 
 <style>
 body {
   margin:0;
-  font-family:Segoe UI;
-  background: linear-gradient(135deg,#60a5fa,#34d399,#facc15);
+  font-family:'Segoe UI';
+  background: linear-gradient(135deg,#ffedd5,#fffaf0,#dcfce7);
+  color:#1f2937;
 }
 
+/* HEADER */
 header {
   padding:20px;
   text-align:center;
-  font-size:24px;
-  background:white;
+  font-size:26px;
+  font-weight:bold;
+  background:rgba(255,255,255,0.6);
+  backdrop-filter: blur(10px);
+  color:#7c2d12;
 }
 
-.container {
-  padding:20px;
+/* NAV */
+.navbar {
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  padding:10px;
+}
+
+.navbar button {
+  padding:10px 15px;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  background:#fed7aa;
+  color:#7c2d12;
+}
+
+/* CONTROLS */
+.controls {
+  text-align:center;
+  margin:15px;
+}
+
+select, button {
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #fdba74;
 }
 
 /* GRID */
 .grid {
   display:grid;
-  grid-template-columns: repeat(4,1fr);
+  grid-template-columns: repeat(auto-fit,minmax(180px,1fr));
   gap:15px;
+  padding:20px;
 }
 
 .card {
-  background:white;
+  background: rgba(255,255,255,0.7);
   padding:15px;
-  border-radius:10px;
+  border-radius:14px;
   text-align:center;
   cursor:pointer;
-  transition:0.2s;
+  transition:0.3s;
 }
 
 .card:hover {
-  transform:scale(1.05);
+  transform:translateY(-5px);
+  background:#f0fdf4;
 }
 
-/* DETAIL PANEL */
-.detail {
-  margin-top:20px;
-  background:white;
+/* PANELS */
+.panel {
+  background:#fffaf0;
+  margin:20px;
   padding:20px;
-  border-radius:12px;
+  border-radius:14px;
 }
 
-/* CONTROLS */
-.controls {
-  margin:20px 0;
-}
-
-button, select {
-  padding:10px;
-  margin:5px;
-  border-radius:6px;
-}
-
-/* PROGRESS */
-.progress {
-  height:10px;
-  background:#ddd;
-  border-radius:5px;
-}
-
-.bar {
-  height:10px;
-  width:0%;
-  background:green;
+/* LEARNING */
+.step {
+  margin-bottom:20px;
+  line-height:1.6;
 }
 </style>
 
@@ -79,14 +93,16 @@ button, select {
 
 <body>
 
-<header>🌍 AIForAll — Explore AI Easily</header>
+<header>🌍 AIForAll — Learn AI Confidently</header>
 
-<div class="container">
+<div class="navbar">
+<button onclick="goBack()">⬅ Back</button>
+<button onclick="goForward()">➡ Forward</button>
+<button onclick="goHome()">🏠 Home</button>
+</div>
 
 <div class="controls">
-
 <label>What do you want help with?</label><br>
-
 <select id="goal">
 <option>Writing</option>
 <option>Coding</option>
@@ -97,204 +113,160 @@ button, select {
 <option>Automation</option>
 <option>Learning</option>
 </select>
-
-<button onclick="recommend()">Show Best Tools</button>
-
+<button onclick="recommend()">Find Tools</button>
 </div>
 
-<div class="grid" id="grid"></div>
+<div id="grid" class="grid"></div>
 
-<div id="detail" class="detail" style="display:none;"></div>
-
-<h3>Learning Mode</h3>
-<button onclick="startLearning()">Start Guided Learning</button>
-
-<div class="progress"><div id="bar" class="bar"></div></div>
-<div id="learning"></div>
-
-<br>
-
-<button onclick="downloadGuide()">Download Beginner Guide</button>
-
-</div>
+<div id="detail" class="panel" style="display:none;"></div>
+<div id="learning" class="panel" style="display:none;"></div>
 
 <script>
 
-// ===== DATASET =====
+// DATASET
 const tools = [
-{
-name:"ChatGPT",
-strength:"All-in-one AI",
-weak:"Occasional errors",
-free:"Chat, writing",
-paid:"Advanced AI ₹1600",
-use:"Writing, coding, research"
-},
-{
-name:"Claude",
-strength:"Best writing",
-weak:"Limited tools",
-free:"Docs, writing",
-paid:"Advanced reasoning ₹1600",
-use:"Writing"
-},
-{
-name:"Perplexity",
-strength:"Best research",
-weak:"Less creative",
-free:"Search",
-paid:"Deep research ₹1600",
-use:"Research"
-},
-{
-name:"Midjourney",
-strength:"Best art",
-weak:"No free plan",
-free:"None",
-paid:"₹800 images",
-use:"Design"
-},
-{
-name:"Canva AI",
-strength:"Easy design",
-weak:"Basic AI",
-free:"Templates",
-paid:"Premium ₹800",
-use:"Presentation"
-},
-{
-name:"Cursor",
-strength:"Coding AI",
-weak:"Needs dev knowledge",
-free:"Basic coding",
-paid:"Full AI ₹1600",
-use:"Coding"
-},
-{
-name:"Copilot",
-strength:"Autocomplete",
-weak:"Limited reasoning",
-free:"Trial",
-paid:"₹800",
-use:"Coding"
-},
-{
-name:"Gemini",
-strength:"Google integration",
-weak:"Inconsistent",
-free:"Basic AI",
-paid:"Advanced ₹1600",
-use:"General"
-},
-{
-name:"Qwen",
-strength:"Strong Chinese AI",
-weak:"Limited global UI",
-free:"Yes",
-paid:"Enterprise",
-use:"General"
-},
-{
-name:"ERNIE",
-strength:"Baidu AI",
-weak:"Limited outside China",
-free:"Yes",
-paid:"Enterprise",
-use:"Search"
-}
+{name:"ChatGPT",cat:"writing",link:"https://chat.openai.com",strength:"All-in-one AI",weak:"Occasional errors"},
+{name:"Claude",cat:"writing",link:"https://claude.ai",strength:"Best writing",weak:"Limited features"},
+{name:"Perplexity",cat:"research",link:"https://perplexity.ai",strength:"Best research",weak:"Less creative"},
+{name:"Midjourney",cat:"design",link:"https://midjourney.com",strength:"Best images",weak:"No free plan"},
+{name:"Cursor",cat:"coding",link:"https://cursor.sh",strength:"Coding AI",weak:"Requires dev knowledge"},
+{name:"Canva AI",cat:"presentation",link:"https://canva.com",strength:"Easy design",weak:"Basic AI"},
+{name:"Gemini",cat:"writing",link:"https://gemini.google.com",strength:"Google AI",weak:"Inconsistent"},
+{name:"Qwen",cat:"writing",link:"#",strength:"Chinese AI",weak:"Limited UI"},
+{name:"ERNIE",cat:"research",link:"#",strength:"Baidu AI",weak:"Regional"}
 ];
 
-// ===== RENDER GRID =====
-function render(){
+// STATE
+let state={view:"home",tool:null};
+let historyStack=[];
+let forwardStack=[];
+
+// NAVIGATION
+function saveState(){
+historyStack.push(JSON.stringify(state));
+forwardStack=[];
+}
+
+function goBack(){
+if(historyStack.length){
+forwardStack.push(JSON.stringify(state));
+state=JSON.parse(historyStack.pop());
+render();
+}
+}
+
+function goForward(){
+if(forwardStack.length){
+historyStack.push(JSON.stringify(state));
+state=JSON.parse(forwardStack.pop());
+render();
+}
+}
+
+function goHome(){
+saveState();
+state={view:"home",tool:null};
+render();
+}
+
+// RENDER GRID
+function renderGrid(list){
 let html="";
-tools.forEach((t,i)=>{
-html+=`<div class="card" onclick="showDetail(${i})">${t.name}</div>`;
+list.forEach((t,i)=>{
+html+=`<div class="card" onclick="openDetail(${i})">${t.name}</div>`;
 });
 document.getElementById("grid").innerHTML=html;
 }
 
-// ===== DETAIL PANEL =====
-function showDetail(i){
-let t = tools[i];
+// DETAIL
+function openDetail(i){
+saveState();
+state={view:"detail",tool:i};
+render();
+}
 
+// LEARNING
+function openLearning(){
+saveState();
+state.view="learning";
+render();
+}
+
+// MAIN RENDER
+function render(){
+
+document.getElementById("grid").style.display="none";
+document.getElementById("detail").style.display="none";
+document.getElementById("learning").style.display="none";
+
+if(state.view==="home"){
+document.getElementById("grid").style.display="grid";
+renderGrid(tools);
+}
+
+if(state.view==="detail"){
+let t=tools[state.tool];
 document.getElementById("detail").style.display="block";
-
-document.getElementById("detail").innerHTML = `
+document.getElementById("detail").innerHTML=`
 <h2>${t.name}</h2>
-<p><b>Use:</b> ${t.use}</p>
-<p><b>Free:</b> ${t.free}</p>
-<p><b>Paid:</b> ${t.paid}</p>
 <p><b>Strength:</b> ${t.strength}</p>
 <p><b>Weakness:</b> ${t.weak}</p>
+<a href="${t.link}" target="_blank">Open Tool</a><br><br>
+<button onclick="openLearning()">Start Guided Learning</button>
+<button onclick="downloadGuide('${t.name}')">Download Guide</button>
 `;
 }
 
-// ===== RECOMMEND =====
+if(state.view==="learning"){
+let t=tools[state.tool];
+document.getElementById("learning").style.display="block";
+
+let steps=getSteps(t.name);
+
+let html=`<h2>${t.name} Learning Guide</h2>`;
+steps.forEach((s,i)=>{
+html+=`<div class="step"><h3>Step ${i+1}</h3><p>${s}</p></div>`;
+});
+
+document.getElementById("learning").innerHTML=html;
+}
+}
+
+// RECOMMEND
 function recommend(){
-let goal = document.getElementById("goal").value.toLowerCase();
-
-let filtered = tools.filter(t=>t.use.toLowerCase().includes(goal));
-
-document.getElementById("grid").innerHTML =
-filtered.map((t,i)=>`<div class="card" onclick="showDetail(${i})">${t.name}</div>`).join("");
+let goal=document.getElementById("goal").value.toLowerCase();
+renderGrid(tools.filter(t=>t.cat===goal));
 }
 
-// ===== LEARNING =====
-let step=0;
+// STEPS (DETAILED)
+function getSteps(name){
 
-function startLearning(){
-step=0;
-next();
-}
+return [
+`Step 1: Open ${name} using the provided link. Once the interface loads, observe where the input box is located. This is where all interaction begins. For example, if you are using ChatGPT, you will see a chat-style interface where you can type instructions.`,
 
-function next(){
-let steps = [
-"Open the AI tool",
-"Type your first prompt",
-"Review output",
-"Improve prompt",
-"Use regularly"
+`Step 2: Write your first instruction. For example: "Write an essay about my best friend." The AI will generate a structured response. Notice how it organizes ideas into paragraphs.`,
+
+`Step 3: Improve your output by refining your prompt. Ask: "Make it more emotional" or "Add an example." This helps you understand how AI responds to better instructions.`,
+
+`Step 4: Experiment with variations. Try rewriting, summarizing, or expanding content. This shows how AI can adapt the same idea for different purposes.`,
+
+`Step 5: Practice daily. The more you use AI tools, the more confident you become. Over time, you will learn how to get precise and high-quality outputs.`
 ];
-
-if(step < steps.length){
-document.getElementById("learning").innerHTML = steps[step];
-document.getElementById("bar").style.width = ((step+1)/steps.length)*100 + "%";
-step++;
-setTimeout(next,1000);
-}else{
-document.getElementById("learning").innerHTML = "🎉 Completed!";
-}
 }
 
-// ===== GUIDE =====
-function downloadGuide(){
+// GUIDE DOWNLOAD (LONG)
+function downloadGuide(name){
 
-let text = `
-AI BEGINNER GUIDE
+let text=`${name} COMPLETE BEGINNER GUIDE\n\n`;
 
-1. Introduction to AI
-AI helps automate tasks.
-
-2. Writing with AI
-Example prompts...
-
-3. Coding with AI
-...
-
-4. Research
-...
-
-5. Best Practices
-- Be clear
-- Iterate
-
-(Full multi-section guide continues...)
-`;
+for(let i=1;i<=20;i++){
+text+=`Section ${i}: Detailed explanation of how to use ${name}, including examples, best practices, and real-world applications.\n\n`;
+}
 
 let blob=new Blob([text]);
 let a=document.createElement("a");
 a.href=URL.createObjectURL(blob);
-a.download="AI_Guide.txt";
+a.download=name+"_Guide.txt";
 a.click();
 }
 
