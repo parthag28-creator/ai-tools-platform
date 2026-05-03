@@ -54,7 +54,28 @@ header {
 .sidebar button:hover {
   background:#334155;
 }
+<h3>Smart Recommendations</h3>
 
+<select id="goal">
+<option value="content">Content</option>
+<option value="coding">Coding</option>
+<option value="research">Research</option>
+<option value="design">Design</option>
+</select>
+
+<select id="level">
+<option value="beginner">Beginner</option>
+<option value="pro">Professional</option>
+</select>
+
+<select id="budget">
+<option value="free">Free</option>
+<option value="paid">Paid</option>
+</select>
+
+<button onclick="smartRecommend()">Get Smart Picks</button>
+
+<div id="results"></div>
 /* Content */
 .content {
   flex:1;
@@ -155,11 +176,11 @@ Built with AI • Your Intelligence Dashboard
 <script>
 
 const tools = [
-{name:"ChatGPT", category:"productivity", score:92, best_for:["content","research"]},
-{name:"Claude", category:"productivity", score:90, best_for:["content"]},
-{name:"Perplexity", category:"productivity", score:88, best_for:["research"]},
-{name:"Midjourney", category:"image", score:89, best_for:["design"]},
-{name:"Cursor", category:"coding", score:91, best_for:["coding"]}
+{name:"ChatGPT", category:"productivity", score:92, free:true, best_for:["content","research"]},
+{name:"Claude", category:"productivity", score:90, free:true, best_for:["content"]},
+{name:"Perplexity", category:"productivity", score:88, free:true, best_for:["research"]},
+{name:"Midjourney", category:"image", score:89, free:false, best_for:["design"]},
+{name:"Cursor", category:"coding", score:91, free:false, best_for:["coding"]}
 ];
 
 let currentTools = [...tools];
@@ -184,61 +205,65 @@ document.getElementById("tools").innerHTML=html;
 }
 
 // ==========================
-// FILTER
+// SMART RECOMMENDER
 // ==========================
-function filter(category){
-if(category==="all") currentTools = [...tools];
-else currentTools = tools.filter(t=>t.category===category);
+function smartRecommend(){
 
-render(currentTools);
-drawChart(currentTools);
-}
+let goal = document.getElementById("goal").value;
+let level = document.getElementById("level").value;
+let budget = document.getElementById("budget").value;
 
-// ==========================
-// SORT
-// ==========================
-function sortBy(type){
-if(type==="score"){
-currentTools.sort((a,b)=>b.score-a.score);
-}
-else if(type==="name"){
-currentTools.sort((a,b)=>a.name.localeCompare(b.name));
-}
-render(currentTools);
-drawChart(currentTools);
-}
+let scored = tools.map(t=>{
 
-// ==========================
-// BAR CHART (Canvas)
-// ==========================
-function drawChart(list){
-let canvas = document.getElementById("chart");
-let ctx = canvas.getContext("2d");
+let score = 0;
 
-ctx.clearRect(0,0,600,300);
+// Base strength
+score += t.score * 0.4;
 
-let max = Math.max(...list.map(t=>t.score));
+// Goal match
+if(t.best_for.includes(goal)) score += 30;
 
-list.forEach((tool, i)=>{
-let x = i * 100 + 40;
-let height = (tool.score / max) * 200;
+// Budget match
+if(budget==="free" && t.free) score += 20;
+if(budget==="paid") score += 10;
 
-ctx.fillStyle = "#38bdf8";
-ctx.fillRect(x, 250 - height, 50, height);
+// Experience adjustment
+if(level==="beginner" && t.free) score += 10;
+if(level==="pro" && !t.free) score += 10;
 
-ctx.fillStyle = "#fff";
-ctx.fillText(tool.name, x, 270);
+return {...t, finalScore: Math.round(score)};
 });
+
+// Sort
+scored.sort((a,b)=>b.finalScore-a.finalScore);
+
+// Top 3
+let top = scored.slice(0,3);
+
+// Render results
+let html="<h4>Top Recommendations</h4>";
+
+top.forEach(t=>{
+html+=`
+<div class="card">
+<b>${t.name}</b><br>
+Score: ${t.finalScore}<br>
+Why: Strong match for ${goal}, ${
+t.free ? "free access available" : "premium performance"
+}
+</div>
+`;
+});
+
+document.getElementById("results").innerHTML = html;
 }
 
 // ==========================
 // INIT
 // ==========================
 render(currentTools);
-drawChart(currentTools);
 
 </script>
-
 <div class="section-title">Top AI Tools (2026)</div>
 <div style="margin-bottom:10px;">
 <button onclick="sortBy('score')">Sort by Score</button>
