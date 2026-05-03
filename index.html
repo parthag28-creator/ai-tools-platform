@@ -84,14 +84,14 @@ body::before {
   background: linear-gradient(135deg,#065f46,#1e3a8a);
 }
 
-/* DETAIL */
+/* DETAIL PANEL (UPDATED) */
 .panel {
-  background:#064e3b;
+  background:#ff8c00; /* saffron/orange */
   color:white;
   margin:20px;
   padding:25px;
   border-radius:14px;
-  line-height:1.6;
+  line-height:1.35; /* tighter spacing */
 }
 </style>
 
@@ -147,10 +147,8 @@ document.getElementById("grid").innerHTML=html;
 
 function recommend(){
 let val=document.getElementById("goal").value;
-
 let filtered = val==="all"?tools:tools.filter(t=>t.cat===val);
 
-// ensure minimum 4
 while(filtered.length<4){
 filtered.push(...tools.slice(0,4-filtered.length));
 }
@@ -168,26 +166,25 @@ document.getElementById("detail").innerHTML=`
 <a href="${t.link}" target="_blank">🚀 Open Tool</a>
 
 <h3>What is it?</h3>
-<p>${t.name} is a powerful AI tool used for ${t.cat} tasks.</p>
+<p>${t.name} is a powerful AI system designed to assist users in ${t.cat} tasks. It works by understanding natural language inputs and generating intelligent outputs that can help in solving problems, creating content, or automating workflows. For beginners, it acts like a smart assistant, while for professionals, it becomes a productivity tool that can significantly reduce manual effort. Over time, as you interact more with it, you will learn how to give better instructions and receive more accurate outputs.</p>
 
 <h3>Free Version</h3>
-<p>The free version allows beginners to explore core features such as basic usage, testing workflows, and learning how AI behaves.</p>
+<p>The free version is ideal for beginners and casual users. It allows you to explore the core capabilities of the tool such as generating text, answering questions, and performing basic tasks. This is extremely useful for students, learners, and individuals who want to understand how AI works without investing money. However, it is important to note that while the free version is powerful, it may not always provide the fastest responses or the most advanced features.</p>
 
 <h3>Limitations</h3>
-<p>The free version often has slower speed, limited access to advanced models, and fewer capabilities for complex tasks.</p>
+<p>The limitations of the free version include slower response times, restricted access to advanced models, and limitations on usage during peak hours. In practical terms, this means that while you can still perform most tasks, you may experience delays or slightly lower-quality outputs when handling complex queries. Understanding these limitations helps set the right expectations and allows users to decide when an upgrade might be beneficial.</p>
 
 <h3>Paid Version</h3>
-<p>Entry price: ₹1600/month. Unlocks faster responses, better accuracy, and advanced tools.</p>
+<p>The entry-level paid version, typically priced around ₹1600 per month, unlocks enhanced capabilities such as faster response speeds, access to more advanced AI models, and additional features that improve overall performance. These improvements are especially noticeable when working on professional tasks, large documents, or complex problem-solving scenarios.</p>
 
 <h3>Why Upgrade?</h3>
-<p>The paid version significantly enhances performance and unlocks advanced features that improve productivity. Users gain access to faster processing speeds, more intelligent responses, and additional tools that are not available in the free version. For professionals or frequent users, this results in better outputs and time savings.</p>
+<p>Upgrading to the paid version becomes valuable when you start relying on the AI tool regularly for work, studies, or creative tasks. The improved speed ensures that you can complete tasks more efficiently, while the enhanced intelligence of the model provides better accuracy and deeper insights. Additionally, access to premium features allows you to handle more complex workflows, making the tool not just helpful but essential. For professionals, this often translates into time savings and improved output quality, making the investment worthwhile.</p>
 
 <h3>Final Recommendation</h3>
-<p>${t.score>90?"Upgrade recommended for serious users.":"Free version is sufficient for beginners."}</p>
+<p>${t.score>90?"If you are a serious user, upgrading is strongly recommended as it will significantly enhance your productivity and experience.":"For beginners, the free version is more than sufficient to start learning and exploring AI capabilities before deciding to upgrade."}</p>
 `;
 }
 
-// INIT
 renderGrid(tools);
 
 </script>
