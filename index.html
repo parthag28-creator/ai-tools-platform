@@ -5,212 +5,185 @@
 <title>AI Tools Intelligence Platform</title>
 
 <style>
-body {margin:0; font-family:Arial; background:#f4f6f9;}
-header {background:#111; color:#fff; padding:15px; display:flex; justify-content:space-between;}
-.container {display:flex;}
-
-.sidebar {width:260px; background:#1e1e1e; color:#fff; padding:15px;}
-.content {flex:1; padding:20px;}
-
-.card {background:#fff; padding:15px; margin:10px 0; border-radius:10px;}
-
-button, select {
-  width:100%;
-  padding:8px;
-  margin:6px 0;
+body {
+  margin:0;
+  font-family: 'Segoe UI', sans-serif;
+  background:#0f172a;
+  color:#e2e8f0;
 }
 
-.user-box {
-  background:#333;
-  padding:10px;
-  border-radius:8px;
+/* Header */
+header {
+  background:#020617;
+  padding:15px 20px;
+  font-size:20px;
+  font-weight:bold;
+  border-bottom:1px solid #1e293b;
+}
+
+/* Layout */
+.container {
+  display:flex;
+  height:100vh;
+}
+
+/* Sidebar */
+.sidebar {
+  width:250px;
+  background:#020617;
+  padding:20px;
+  border-right:1px solid #1e293b;
+}
+
+.sidebar h3 {
+  color:#94a3b8;
   margin-bottom:10px;
 }
 
-.premium {
-  background:#fff3cd;
+.sidebar button {
+  width:100%;
   padding:10px;
-  border-radius:8px;
-  margin-top:10px;
+  margin:5px 0;
+  background:#1e293b;
+  border:none;
+  color:#fff;
+  border-radius:6px;
+  cursor:pointer;
+}
+
+.sidebar button:hover {
+  background:#334155;
+}
+
+/* Content */
+.content {
+  flex:1;
+  padding:20px;
+  overflow-y:auto;
+}
+
+/* Cards */
+.card {
+  background:#020617;
+  padding:15px;
+  margin:10px 0;
+  border-radius:10px;
+  border:1px solid #1e293b;
+  transition:0.2s;
+}
+
+.card:hover {
+  transform:translateY(-3px);
+  border-color:#38bdf8;
+}
+
+/* Title */
+.card h3 {
+  margin:0;
+}
+
+/* Tags */
+.tag {
+  display:inline-block;
+  padding:4px 8px;
+  margin:5px 5px 0 0;
+  background:#1e293b;
+  border-radius:5px;
+  font-size:12px;
+}
+
+/* Score badge */
+.score {
+  float:right;
+  background:#22c55e;
+  padding:4px 8px;
+  border-radius:6px;
+  font-size:12px;
+}
+
+/* Section title */
+.section-title {
+  font-size:18px;
+  margin-bottom:10px;
+}
+
+/* Footer */
+.footer {
+  text-align:center;
+  padding:10px;
+  font-size:12px;
+  color:#64748b;
 }
 </style>
+
 </head>
 
 <body>
 
 <header>
-<h2>AI Tools Platform</h2>
-<div id="userStatus">Not logged in</div>
+AI Tools Intelligence Platform
 </header>
 
 <div class="container">
 
+<!-- Sidebar -->
 <div class="sidebar">
+<h3>Navigation</h3>
 
-<div class="user-box">
-<button onclick="login()">Login with Google</button>
-<button onclick="logout()">Logout</button>
-</div>
-
-<h3>Recommender</h3>
-
-<select id="goal">
-<option>Content</option>
-<option>Coding</option>
-<option>Research</option>
-<option>Design</option>
-</select>
-
-<select id="budget">
-<option>Free</option>
-<option>Premium</option>
-</select>
-
-<button onclick="recommend()">Recommend</button>
-
-<div id="recommendation"></div>
-
-<div class="premium">
-<b>Premium (Coming Soon)</b>
-<ul>
-<li>Advanced analytics</li>
-<li>Saved tools</li>
-<li>Custom dashboard</li>
-</ul>
-</div>
-
-<h3>Downloads</h3>
-<button onclick="downloadJSON()">Download JSON</button>
-<button onclick="downloadCSV()">Download CSV</button>
-<button onclick="window.print()">Download PDF</button>
+<button onclick="filter('all')">All Tools</button>
+<button onclick="filter('productivity')">Productivity</button>
+<button onclick="filter('coding')">Coding</button>
+<button onclick="filter('image')">Image</button>
 
 </div>
 
+<!-- Content -->
 <div class="content">
-<h3>Tools</h3>
+
+<div class="section-title">Top AI Tools (2026)</div>
+
 <div id="tools"></div>
+
+<div class="footer">
+Built with AI • Your Intelligence Dashboard
+</div>
+
 </div>
 
 </div>
 
 <script>
 
-// =====================
-// DATA (STATIC FALLBACK)
-// =====================
-let tools = [
-{name:"ChatGPT", category:"productivity", score:92, free:true, price:20, best_for:["content","research"]},
-{name:"Claude", category:"productivity", score:90, free:true, price:20, best_for:["content"]},
-{name:"Perplexity", category:"research", score:88, free:true, price:20, best_for:["research"]},
-{name:"Midjourney", category:"image", score:89, free:false, price:10, best_for:["design"]},
-{name:"Cursor", category:"coding", score:91, free:false, price:20, best_for:["coding"]}
+const tools = [
+{name:"ChatGPT", category:"productivity", score:92, best_for:["content","research"]},
+{name:"Claude", category:"productivity", score:90, best_for:["content"]},
+{name:"Perplexity", category:"productivity", score:88, best_for:["research"]},
+{name:"Midjourney", category:"image", score:89, best_for:["design"]},
+{name:"Cursor", category:"coding", score:91, best_for:["coding"]}
 ];
 
-// =====================
-// API LAYER (MOCK)
-// =====================
-async function fetchData(){
-try{
-  // MOCK API (replace later)
-  let res = await fetch("/api/tools");
-  let data = await res.json();
-  tools = data;
-}catch{
-  console.log("Using static dataset");
-}
-}
-
-// =====================
-// RENDER
-// =====================
-function render(){
+function render(list){
 let html="";
-tools.forEach(t=>{
+list.forEach(t=>{
 html+=`
 <div class="card">
+<span class="score">${t.score}</span>
 <h3>${t.name}</h3>
-<p>Score: ${t.score}</p>
-<p>Best for: ${t.best_for.join(", ")}</p>
+<div>
+${t.best_for.map(tag=>`<span class="tag">${tag}</span>`).join("")}
+</div>
 </div>
 `;
 });
 document.getElementById("tools").innerHTML=html;
 }
 
-// =====================
-// RECOMMENDER
-// =====================
-function recommend(){
-let goal=document.getElementById("goal").value.toLowerCase();
-let budget=document.getElementById("budget").value;
-
-let result=tools.filter(t=>t.best_for.includes(goal));
-
-if(budget==="Free"){
-result=result.filter(t=>t.free);
+function filter(category){
+if(category==="all") render(tools);
+else render(tools.filter(t=>t.category===category));
 }
 
-result.sort((a,b)=>b.score-a.score);
-
-let html="";
-result.slice(0,3).forEach(t=>{
-html+=`<p><b>${t.name}</b> (${t.score})</p>`;
-});
-
-document.getElementById("recommendation").innerHTML=html || "No match";
-}
-
-// =====================
-// LOGIN SYSTEM (SIMULATED)
-// =====================
-function login(){
-let user = {
-name:"Demo User",
-email:"user@gmail.com"
-};
-localStorage.setItem("user", JSON.stringify(user));
-updateUser();
-}
-
-function logout(){
-localStorage.removeItem("user");
-updateUser();
-}
-
-function updateUser(){
-let user = JSON.parse(localStorage.getItem("user"));
-document.getElementById("userStatus").innerHTML = user ? "Logged in: "+user.name : "Not logged in";
-}
-
-// =====================
-// DOWNLOADS
-// =====================
-function downloadJSON(){
-let blob = new Blob([JSON.stringify(tools,null,2)],{type:"application/json"});
-let a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download="tools.json";
-a.click();
-}
-
-function downloadCSV(){
-let csv="name,score,price\n";
-tools.forEach(t=>{
-csv+=`${t.name},${t.score},${t.price}\n`;
-});
-let blob=new Blob([csv],{type:"text/csv"});
-let a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download="tools.csv";
-a.click();
-}
-
-// =====================
-// INIT
-// =====================
-fetchData();
-render();
-updateUser();
+render(tools);
 
 </script>
 
