@@ -68,7 +68,7 @@ AI Tools Intelligence Platform
 <div class="sidebar">
 
 <h3>User</h3>
-<button onclick="login()">Login with Google</button>
+<button onclick="login()">Login</button>
 <button onclick="logout()">Logout</button>
 <div id="userInfo">Not logged in</div>
 
@@ -119,47 +119,29 @@ AI Tools Intelligence Platform
 
 </div>
 
-<!-- FIREBASE (ADD YOUR KEYS LATER) -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getAuth, signInWithPopup, GoogleAuthProvider, signOut } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-auth.js";
+<script>
 
-const firebaseConfig = {
-  apiKey: "YOUR_KEY",
-  authDomain: "YOUR_DOMAIN",
-  projectId: "YOUR_ID"
-};
-
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-
-window.login = function(){
-  const provider = new GoogleAuthProvider();
-  signInWithPopup(auth, provider)
-    .then(result=>{
-      localStorage.setItem("user", JSON.stringify(result.user));
-      updateUser();
-    });
+// ================= LOGIN (SIMPLE) =================
+function login(){
+  let name = prompt("Enter your name:");
+  if(name){
+    localStorage.setItem("user", JSON.stringify({displayName:name}));
+    updateUser();
+  }
 }
 
-window.logout = function(){
-  signOut(auth);
+function logout(){
   localStorage.removeItem("user");
   updateUser();
 }
 
-window.updateUser = function(){
+function updateUser(){
   let user = JSON.parse(localStorage.getItem("user"));
   document.getElementById("userInfo").innerText =
     user ? "👤 " + user.displayName : "Not logged in";
 }
 
-updateUser();
-</script>
-
-<script>
-
-// DATA
+// ================= DATA =================
 const tools = [
 {name:"ChatGPT", category:"productivity", score:92, free:true, best_for:["content","research"]},
 {name:"Claude", category:"productivity", score:90, free:true, best_for:["content"]},
@@ -170,7 +152,7 @@ const tools = [
 
 let currentTools = [...tools];
 
-// RENDER
+// ================= RENDER =================
 function render(list){
 let html="";
 list.forEach(t=>{
@@ -187,7 +169,7 @@ ${t.best_for.map(tag=>`<span class="tag">${tag}</span>`).join("")}
 document.getElementById("tools").innerHTML=html;
 }
 
-// SORT
+// ================= SORT =================
 function sortBy(type){
 if(type==="score") currentTools.sort((a,b)=>b.score-a.score);
 if(type==="name") currentTools.sort((a,b)=>a.name.localeCompare(b.name));
@@ -195,7 +177,7 @@ render(currentTools);
 drawChart(currentTools);
 }
 
-// CHART
+// ================= CHART =================
 function drawChart(list){
 let ctx = document.getElementById("chart").getContext("2d");
 ctx.clearRect(0,0,600,300);
@@ -214,7 +196,7 @@ ctx.fillText(t.name,x,270);
 });
 }
 
-// SMART RECOMMEND
+// ================= SMART RECOMMEND =================
 function smartRecommend(){
 let goal=document.getElementById("goal").value;
 let level=document.getElementById("level").value;
@@ -248,7 +230,7 @@ Score: ${t.finalScore}<br>
 document.getElementById("results").innerHTML=html;
 }
 
-// SAVE
+// ================= SAVE =================
 function saveTool(name){
 let saved=JSON.parse(localStorage.getItem("savedTools"))||[];
 if(!saved.includes(name)){
@@ -258,7 +240,7 @@ alert("Saved!");
 }
 }
 
-// VIEW SAVED
+// ================= VIEW SAVED =================
 function viewSaved(){
 let saved=JSON.parse(localStorage.getItem("savedTools"))||[];
 let html="<h4>Saved Tools</h4>";
@@ -266,7 +248,8 @@ saved.forEach(n=> html+=`<p>${n}</p>`);
 document.getElementById("savedList").innerHTML=html;
 }
 
-// INIT
+// ================= INIT =================
+updateUser();
 render(currentTools);
 drawChart(currentTools);
 
