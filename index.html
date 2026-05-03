@@ -27,15 +27,6 @@ body::before {
   z-index:-1;
 }
 
-/* HEADER */
-header {
-  padding:20px;
-  text-align:center;
-  font-size:26px;
-  font-weight:bold;
-  background:rgba(255,255,255,0.7);
-}
-
 /* NAV */
 .navbar {
   display:flex;
@@ -48,10 +39,9 @@ header {
   background:#d97706;
   color:white;
   font-weight:bold;
+  padding:10px;
   border:none;
-  padding:10px 15px;
   border-radius:10px;
-  cursor:pointer;
 }
 
 /* CONTROLS */
@@ -60,42 +50,48 @@ header {
   margin:20px;
 }
 
-.controls select {
-  padding:10px;
-  border-radius:8px;
-}
-
 /* GRID */
 .grid {
   display:grid;
   grid-template-columns: repeat(4,1fr);
-  gap:15px;
+  gap:12px;
   padding:20px;
 }
 
+/* CARDS */
 .card {
-  background:#1e3a8a;
-  color:white;
   padding:15px;
   border-radius:12px;
-  text-align:center;
-  cursor:pointer;
+  color:white;
   font-weight:bold;
+  display:flex;
+  justify-content:space-between;
+  cursor:pointer;
 }
 
-/* PANEL */
+/* LEFT */
+.left {
+  background: linear-gradient(135deg,#ff8c00,#ffd699);
+}
+
+/* CENTER */
+.center {
+  background:#1e3a8a;
+}
+
+/* RIGHT */
+.right {
+  background: linear-gradient(135deg,#065f46,#1e3a8a);
+}
+
+/* DETAIL */
 .panel {
   background:#064e3b;
   color:white;
   margin:20px;
   padding:25px;
-  border-radius:16px;
+  border-radius:14px;
   line-height:1.6;
-}
-
-a {
-  color:#facc15;
-  font-weight:bold;
 }
 </style>
 
@@ -103,12 +99,8 @@ a {
 
 <body>
 
-<header>🌍 AIForAll — Global AI Explorer</header>
-
 <div class="navbar">
-<button onclick="goBack()">⬅ Back</button>
-<button onclick="goForward()">➡ Forward</button>
-<button onclick="goHome()">🏠 Home</button>
+<button onclick="render()">🏠 Home</button>
 </div>
 
 <div class="controls">
@@ -119,97 +111,56 @@ a {
 <option value="coding">Coding</option>
 <option value="research">Research</option>
 <option value="design">Design</option>
-<option value="video">Video</option>
 </select>
 </div>
 
 <div id="grid" class="grid"></div>
-
 <div id="detail" class="panel" style="display:none;"></div>
 
 <script>
 
-// DATASET (GLOBAL)
 const tools = [
-{name:"ChatGPT",cat:"writing",link:"https://chat.openai.com",desc:"Advanced AI assistant for writing, coding and more.",best:"Writing, coding, research",free:"Basic chat and writing",limit:"Limited advanced features",paid:"₹1600/month unlocks advanced AI, faster speed, image tools",why:"The paid version dramatically improves performance, enabling better reasoning, faster outputs, and access to premium features like image generation and file uploads."},
-
-{name:"Claude",cat:"writing",link:"https://claude.ai",desc:"AI for deep writing and analysis.",best:"Long documents",free:"Basic writing",limit:"Fewer integrations",paid:"₹1600/month for better context",why:"Claude shines for long documents and deep analysis, making the upgrade useful for professionals."},
-
-{name:"Perplexity",cat:"research",link:"https://perplexity.ai",desc:"AI search engine with sources.",best:"Research",free:"Basic answers",limit:"Limited deep queries",paid:"₹1600/month for pro research",why:"The pro version provides deeper insights and better source-backed answers."},
-
-{name:"Midjourney",cat:"design",link:"https://midjourney.com",desc:"AI image generator.",best:"Creative visuals",free:"No free tier",limit:"Paid only",paid:"₹800/month",why:"Delivers unmatched artistic quality for designers."},
-
-{name:"Gemini",cat:"writing",link:"https://gemini.google.com",desc:"Google AI assistant.",best:"General tasks",free:"Basic usage",limit:"Inconsistent",paid:"₹1600/month",why:"Integrates well with Google ecosystem."},
-
-{name:"Qwen",cat:"writing",link:"#",desc:"Alibaba AI model.",best:"General AI",free:"Free",limit:"UI limited",paid:"Free",why:"Good alternative free AI."},
-
-{name:"ERNIE",cat:"research",link:"#",desc:"Baidu AI system.",best:"Search",free:"Free",limit:"Region locked",paid:"Free",why:"Useful for Chinese ecosystem."},
-
-{name:"Kling",cat:"video",link:"#",desc:"AI video generator.",best:"Video",free:"Limited",limit:"Restricted",paid:"₹1200/month",why:"Great for creators."}
+{name:"ChatGPT",cat:"writing",score:95,link:"https://chat.openai.com"},
+{name:"Claude",cat:"writing",score:92,link:"https://claude.ai"},
+{name:"Perplexity",cat:"research",score:90,link:"https://perplexity.ai"},
+{name:"Cursor",cat:"coding",score:93,link:"https://cursor.sh"},
+{name:"Copilot",cat:"coding",score:89,link:"https://github.com/copilot"},
+{name:"Midjourney",cat:"design",score:94,link:"https://midjourney.com"},
+{name:"Gemini",cat:"writing",score:88,link:"https://gemini.google.com"},
+{name:"Kling",cat:"design",score:85,link:"#"}
 ];
 
-// STATE
-let state={view:"home",tool:null};
-let historyStack=[];
-let forwardStack=[];
-
-// NAV
-function saveState(){
-historyStack.push(JSON.stringify(state));
-forwardStack=[];
-}
-
-function goBack(){
-if(historyStack.length){
-forwardStack.push(JSON.stringify(state));
-state=JSON.parse(historyStack.pop());
-render();
-}
-}
-
-function goForward(){
-if(forwardStack.length){
-historyStack.push(JSON.stringify(state));
-state=JSON.parse(forwardStack.pop());
-render();
-}
-}
-
-function goHome(){
-saveState();
-state={view:"home",tool:null};
-render();
-}
-
-// GRID
 function renderGrid(list){
 let html="";
 list.forEach((t,i)=>{
-html+=`<div class="card" onclick="openDetail(${i})">${t.name}</div>`;
+
+let style = i%3==0?"left":i%3==1?"center":"right";
+
+html+=`
+<div class="card ${style}" onclick="showDetail(${i})">
+<span>${t.name}</span>
+<span>${t.score}%</span>
+</div>`;
 });
 document.getElementById("grid").innerHTML=html;
 }
 
-// DETAIL
-function openDetail(i){
-saveState();
-state={view:"detail",tool:i};
-render();
+function recommend(){
+let val=document.getElementById("goal").value;
+
+let filtered = val==="all"?tools:tools.filter(t=>t.cat===val);
+
+// ensure minimum 4
+while(filtered.length<4){
+filtered.push(...tools.slice(0,4-filtered.length));
 }
 
-// RENDER
-function render(){
-
-document.getElementById("grid").style.display="none";
-document.getElementById("detail").style.display="none";
-
-if(state.view==="home"){
-document.getElementById("grid").style.display="grid";
-renderGrid(tools);
+renderGrid(filtered);
 }
 
-if(state.view==="detail"){
-let t=tools[state.tool];
+function showDetail(i){
+
+let t=tools[i];
 
 document.getElementById("detail").style.display="block";
 document.getElementById("detail").innerHTML=`
@@ -217,35 +168,27 @@ document.getElementById("detail").innerHTML=`
 <a href="${t.link}" target="_blank">🚀 Open Tool</a>
 
 <h3>What is it?</h3>
-<p>${t.desc}</p>
-
-<h3>Best For</h3>
-<p>${t.best}</p>
+<p>${t.name} is a powerful AI tool used for ${t.cat} tasks.</p>
 
 <h3>Free Version</h3>
-<p>${t.free}</p>
+<p>The free version allows beginners to explore core features such as basic usage, testing workflows, and learning how AI behaves.</p>
 
 <h3>Limitations</h3>
-<p>${t.limit}</p>
+<p>The free version often has slower speed, limited access to advanced models, and fewer capabilities for complex tasks.</p>
 
 <h3>Paid Version</h3>
-<p>${t.paid}</p>
+<p>Entry price: ₹1600/month. Unlocks faster responses, better accuracy, and advanced tools.</p>
 
 <h3>Why Upgrade?</h3>
-<p>${t.why}</p>
-`;
-}
-}
+<p>The paid version significantly enhances performance and unlocks advanced features that improve productivity. Users gain access to faster processing speeds, more intelligent responses, and additional tools that are not available in the free version. For professionals or frequent users, this results in better outputs and time savings.</p>
 
-// FILTER
-function recommend(){
-let val=document.getElementById("goal").value;
-if(val==="all") renderGrid(tools);
-else renderGrid(tools.filter(t=>t.cat===val));
+<h3>Final Recommendation</h3>
+<p>${t.score>90?"Upgrade recommended for serious users.":"Free version is sufficient for beginners."}</p>
+`;
 }
 
 // INIT
-render();
+renderGrid(tools);
 
 </script>
 
