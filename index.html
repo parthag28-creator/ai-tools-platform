@@ -162,6 +162,99 @@ const tools = [
 {name:"Cursor", category:"coding", score:91, best_for:["coding"]}
 ];
 
+let currentTools = [...tools];
+
+// ==========================
+// RENDER CARDS
+// ==========================
+function render(list){
+let html="";
+list.forEach(t=>{
+html+=`
+<div class="card">
+<span class="score">${t.score}</span>
+<h3>${t.name}</h3>
+<div>
+${t.best_for.map(tag=>`<span class="tag">${tag}</span>`).join("")}
+</div>
+</div>
+`;
+});
+document.getElementById("tools").innerHTML=html;
+}
+
+// ==========================
+// FILTER
+// ==========================
+function filter(category){
+if(category==="all") currentTools = [...tools];
+else currentTools = tools.filter(t=>t.category===category);
+
+render(currentTools);
+drawChart(currentTools);
+}
+
+// ==========================
+// SORT
+// ==========================
+function sortBy(type){
+if(type==="score"){
+currentTools.sort((a,b)=>b.score-a.score);
+}
+else if(type==="name"){
+currentTools.sort((a,b)=>a.name.localeCompare(b.name));
+}
+render(currentTools);
+drawChart(currentTools);
+}
+
+// ==========================
+// BAR CHART (Canvas)
+// ==========================
+function drawChart(list){
+let canvas = document.getElementById("chart");
+let ctx = canvas.getContext("2d");
+
+ctx.clearRect(0,0,600,300);
+
+let max = Math.max(...list.map(t=>t.score));
+
+list.forEach((tool, i)=>{
+let x = i * 100 + 40;
+let height = (tool.score / max) * 200;
+
+ctx.fillStyle = "#38bdf8";
+ctx.fillRect(x, 250 - height, 50, height);
+
+ctx.fillStyle = "#fff";
+ctx.fillText(tool.name, x, 270);
+});
+}
+
+// ==========================
+// INIT
+// ==========================
+render(currentTools);
+drawChart(currentTools);
+
+</script>
+
+<div class="section-title">Top AI Tools (2026)</div>
+<div style="margin-bottom:10px;">
+<button onclick="sortBy('score')">Sort by Score</button>
+<button onclick="sortBy('name')">Sort by Name</button>
+</div>
+
+<canvas id="chart" width="600" height="300"></canvas>
+
+const tools = [
+{name:"ChatGPT", category:"productivity", score:92, best_for:["content","research"]},
+{name:"Claude", category:"productivity", score:90, best_for:["content"]},
+{name:"Perplexity", category:"productivity", score:88, best_for:["research"]},
+{name:"Midjourney", category:"image", score:89, best_for:["design"]},
+{name:"Cursor", category:"coding", score:91, best_for:["coding"]}
+];
+
 function render(list){
 let html="";
 list.forEach(t=>{
