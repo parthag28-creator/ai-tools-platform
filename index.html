@@ -8,8 +8,25 @@
 body {
   margin:0;
   font-family:'Segoe UI';
-  background: linear-gradient(135deg,#ffedd5,#fffaf0,#dcfce7);
+
+  /* 🇮🇳 Brighter Gradient */
+  background: linear-gradient(135deg,#ff9933,#fff5e6,#138808);
   color:#1f2937;
+}
+
+/* Ashoka Chakra */
+body::before {
+  content:"";
+  position:fixed;
+  top:50%;
+  left:50%;
+  width:500px;
+  height:500px;
+  transform:translate(-50%,-50%);
+  background:url('https://upload.wikimedia.org/wikipedia/commons/1/17/Ashoka_Chakra.svg') no-repeat center;
+  background-size:contain;
+  opacity:0.05;
+  z-index:-1;
 }
 
 /* HEADER */
@@ -18,9 +35,7 @@ header {
   text-align:center;
   font-size:26px;
   font-weight:bold;
-  background:rgba(255,255,255,0.6);
-  backdrop-filter: blur(10px);
-  color:#7c2d12;
+  background:rgba(255,255,255,0.7);
 }
 
 /* NAV */
@@ -35,21 +50,14 @@ header {
   padding:10px 15px;
   border:none;
   border-radius:10px;
+  background:#ffb366;
   cursor:pointer;
-  background:#fed7aa;
-  color:#7c2d12;
 }
 
 /* CONTROLS */
 .controls {
   text-align:center;
   margin:15px;
-}
-
-select, button {
-  padding:10px;
-  border-radius:8px;
-  border:1px solid #fdba74;
 }
 
 /* GRID */
@@ -61,7 +69,7 @@ select, button {
 }
 
 .card {
-  background: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.85);
   padding:15px;
   border-radius:14px;
   text-align:center;
@@ -70,22 +78,23 @@ select, button {
 }
 
 .card:hover {
-  transform:translateY(-5px);
-  background:#f0fdf4;
+  transform:scale(1.05);
 }
 
-/* PANELS */
+/* PANEL */
 .panel {
-  background:#fffaf0;
+  background:white;
   margin:20px;
-  padding:20px;
-  border-radius:14px;
+  padding:25px;
+  border-radius:16px;
+  line-height:1.6;
 }
 
-/* LEARNING */
-.step {
-  margin-bottom:20px;
-  line-height:1.6;
+/* BUTTON */
+button {
+  padding:10px;
+  margin:5px;
+  border-radius:8px;
 }
 </style>
 
@@ -93,7 +102,7 @@ select, button {
 
 <body>
 
-<header>🌍 AIForAll — Learn AI Confidently</header>
+<header>🌍 AIForAll — Explore AI Confidently</header>
 
 <div class="navbar">
 <button onclick="goBack()">⬅ Back</button>
@@ -102,16 +111,12 @@ select, button {
 </div>
 
 <div class="controls">
-<label>What do you want help with?</label><br>
 <select id="goal">
 <option>Writing</option>
 <option>Coding</option>
 <option>Research</option>
 <option>Design</option>
 <option>Presentation</option>
-<option>Video</option>
-<option>Automation</option>
-<option>Learning</option>
 </select>
 <button onclick="recommend()">Find Tools</button>
 </div>
@@ -119,21 +124,46 @@ select, button {
 <div id="grid" class="grid"></div>
 
 <div id="detail" class="panel" style="display:none;"></div>
-<div id="learning" class="panel" style="display:none;"></div>
 
 <script>
 
-// DATASET
+// DATA
 const tools = [
-{name:"ChatGPT",cat:"writing",link:"https://chat.openai.com",strength:"All-in-one AI",weak:"Occasional errors"},
-{name:"Claude",cat:"writing",link:"https://claude.ai",strength:"Best writing",weak:"Limited features"},
-{name:"Perplexity",cat:"research",link:"https://perplexity.ai",strength:"Best research",weak:"Less creative"},
-{name:"Midjourney",cat:"design",link:"https://midjourney.com",strength:"Best images",weak:"No free plan"},
-{name:"Cursor",cat:"coding",link:"https://cursor.sh",strength:"Coding AI",weak:"Requires dev knowledge"},
-{name:"Canva AI",cat:"presentation",link:"https://canva.com",strength:"Easy design",weak:"Basic AI"},
-{name:"Gemini",cat:"writing",link:"https://gemini.google.com",strength:"Google AI",weak:"Inconsistent"},
-{name:"Qwen",cat:"writing",link:"#",strength:"Chinese AI",weak:"Limited UI"},
-{name:"ERNIE",cat:"research",link:"#",strength:"Baidu AI",weak:"Regional"}
+{
+name:"ChatGPT",
+cat:"writing",
+link:"https://chat.openai.com",
+desc:"ChatGPT is an advanced AI assistant capable of writing, coding, researching, and solving complex problems in a conversational way.",
+best:"Best for writing, studying, coding help, and productivity.",
+free:"The free version allows users to chat, write essays, summarize text, and get basic coding help.",
+limit:"Limited access to advanced models and slower performance during peak usage.",
+paid:"The paid version (~₹1600/month) unlocks faster responses, advanced models, image generation, and higher accuracy.",
+why:"Upgrading to the paid version of ChatGPT significantly improves both speed and capability. Users get access to more advanced AI models that produce better reasoning, more accurate outputs, and richer responses. Additionally, features like image generation, file uploads, and deeper analysis tools become available. For professionals, students, and creators, this translates to saving time and producing higher-quality work. If you rely on AI frequently for research, writing, or coding, the paid plan becomes a powerful productivity multiplier."
+},
+
+{
+name:"Claude",
+cat:"writing",
+link:"https://claude.ai",
+desc:"Claude is an AI focused on natural writing and deep understanding of large documents.",
+best:"Best for long-form writing, document analysis, and professional communication.",
+free:"Free version allows writing, summaries, and document interaction.",
+limit:"Fewer integrations and features compared to competitors.",
+paid:"Paid plan improves context size and response quality.",
+why:"Claude’s paid version is particularly valuable for users working with large documents such as reports, contracts, or research papers."
+},
+
+{
+name:"Perplexity",
+cat:"research",
+link:"https://perplexity.ai",
+desc:"Perplexity is an AI-powered search engine that provides direct answers with sources.",
+best:"Best for research and fact-checking.",
+free:"Basic research queries with citations.",
+limit:"Limited deep research capabilities.",
+paid:"Pro plan unlocks deeper search and better models.",
+why:"The paid version enhances research depth, making it ideal for analysts and students."
+}
 ];
 
 // STATE
@@ -141,7 +171,7 @@ let state={view:"home",tool:null};
 let historyStack=[];
 let forwardStack=[];
 
-// NAVIGATION
+// NAV
 function saveState(){
 historyStack.push(JSON.stringify(state));
 forwardStack=[];
@@ -169,7 +199,7 @@ state={view:"home",tool:null};
 render();
 }
 
-// RENDER GRID
+// GRID
 function renderGrid(list){
 let html="";
 list.forEach((t,i)=>{
@@ -185,19 +215,10 @@ state={view:"detail",tool:i};
 render();
 }
 
-// LEARNING
-function openLearning(){
-saveState();
-state.view="learning";
-render();
-}
-
-// MAIN RENDER
 function render(){
 
 document.getElementById("grid").style.display="none";
 document.getElementById("detail").style.display="none";
-document.getElementById("learning").style.display="none";
 
 if(state.view==="home"){
 document.getElementById("grid").style.display="grid";
@@ -207,28 +228,30 @@ renderGrid(tools);
 if(state.view==="detail"){
 let t=tools[state.tool];
 document.getElementById("detail").style.display="block";
+
 document.getElementById("detail").innerHTML=`
 <h2>${t.name}</h2>
-<p><b>Strength:</b> ${t.strength}</p>
-<p><b>Weakness:</b> ${t.weak}</p>
-<a href="${t.link}" target="_blank">Open Tool</a><br><br>
-<button onclick="openLearning()">Start Guided Learning</button>
-<button onclick="downloadGuide('${t.name}')">Download Guide</button>
+
+<a href="${t.link}" target="_blank">🚀 Open Tool</a>
+
+<h3>What is it?</h3>
+<p>${t.desc}</p>
+
+<h3>Best For</h3>
+<p>${t.best}</p>
+
+<h3>Free Version</h3>
+<p>${t.free}</p>
+
+<h3>Limitations</h3>
+<p>${t.limit}</p>
+
+<h3>Paid Version</h3>
+<p>${t.paid}</p>
+
+<h3>Why Upgrade?</h3>
+<p>${t.why}</p>
 `;
-}
-
-if(state.view==="learning"){
-let t=tools[state.tool];
-document.getElementById("learning").style.display="block";
-
-let steps=getSteps(t.name);
-
-let html=`<h2>${t.name} Learning Guide</h2>`;
-steps.forEach((s,i)=>{
-html+=`<div class="step"><h3>Step ${i+1}</h3><p>${s}</p></div>`;
-});
-
-document.getElementById("learning").innerHTML=html;
 }
 }
 
@@ -236,38 +259,6 @@ document.getElementById("learning").innerHTML=html;
 function recommend(){
 let goal=document.getElementById("goal").value.toLowerCase();
 renderGrid(tools.filter(t=>t.cat===goal));
-}
-
-// STEPS (DETAILED)
-function getSteps(name){
-
-return [
-`Step 1: Open ${name} using the provided link. Once the interface loads, observe where the input box is located. This is where all interaction begins. For example, if you are using ChatGPT, you will see a chat-style interface where you can type instructions.`,
-
-`Step 2: Write your first instruction. For example: "Write an essay about my best friend." The AI will generate a structured response. Notice how it organizes ideas into paragraphs.`,
-
-`Step 3: Improve your output by refining your prompt. Ask: "Make it more emotional" or "Add an example." This helps you understand how AI responds to better instructions.`,
-
-`Step 4: Experiment with variations. Try rewriting, summarizing, or expanding content. This shows how AI can adapt the same idea for different purposes.`,
-
-`Step 5: Practice daily. The more you use AI tools, the more confident you become. Over time, you will learn how to get precise and high-quality outputs.`
-];
-}
-
-// GUIDE DOWNLOAD (LONG)
-function downloadGuide(name){
-
-let text=`${name} COMPLETE BEGINNER GUIDE\n\n`;
-
-for(let i=1;i<=20;i++){
-text+=`Section ${i}: Detailed explanation of how to use ${name}, including examples, best practices, and real-world applications.\n\n`;
-}
-
-let blob=new Blob([text]);
-let a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download=name+"_Guide.txt";
-a.click();
 }
 
 // INIT
