@@ -2,81 +2,118 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>AIForAll — AI Tools Intelligence Platform</title>
+<title>AIForAll — Learn & Use AI Easily</title>
 
 <style>
-body {margin:0;font-family:Segoe UI;background:#0f172a;color:#e2e8f0;}
-header {background:#020617;padding:15px;font-size:20px;font-weight:bold;}
-.container{display:flex;height:100vh;}
-.sidebar{width:280px;background:#020617;padding:20px;border-right:1px solid #1e293b;overflow:auto;}
-.content{flex:1;padding:20px;overflow:auto;}
-button,select,input{width:100%;margin:6px 0;padding:8px;border-radius:6px;border:none;background:#1e293b;color:white;}
-.card{background:#020617;padding:15px;margin:10px 0;border-radius:10px;border:1px solid #1e293b;}
-.score{float:right;background:#22c55e;padding:4px 8px;border-radius:5px;}
-.tag{background:#1e293b;padding:3px 6px;margin:3px;border-radius:4px;display:inline-block;}
-a{color:#38bdf8;text-decoration:none;}
+body {
+  margin:0;
+  font-family:Segoe UI;
+  background: linear-gradient(135deg,#60a5fa,#34d399,#facc15);
+  color:#0f172a;
+}
+
+header {
+  padding:20px;
+  font-size:24px;
+  font-weight:bold;
+  background:white;
+  text-align:center;
+}
+
+.container {display:flex;height:100vh;}
+
+.sidebar {
+  width:300px;
+  background:white;
+  padding:20px;
+  overflow:auto;
+}
+
+.content {
+  flex:1;
+  padding:20px;
+  overflow:auto;
+}
+
+button,select,input {
+  width:100%;
+  margin:8px 0;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #cbd5e1;
+}
+
+.card {
+  background:white;
+  padding:15px;
+  margin:12px 0;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.1);
+}
+
+.score {
+  float:right;
+  background:#22c55e;
+  color:white;
+  padding:5px 10px;
+  border-radius:8px;
+}
+
+a {color:#2563eb;}
 </style>
 
 </head>
+
 <body>
 
-<header>AIForAll — AI Intelligence Platform (2026)</header>
+<header>🌍 AIForAll — Your Friendly Guide to AI (2026)</header>
 
 <div class="container">
 
 <div class="sidebar">
 
-<h3>User</h3>
-<button onclick="login()">Login</button>
-<button onclick="logout()">Logout</button>
-<div id="userInfo"></div>
-
-<h3>Search</h3>
+<h3>🔍 Search</h3>
 <input id="search" placeholder="Search tools..." oninput="searchTools()">
 
-<h3>Filter</h3>
+<h3>📂 Category</h3>
 <select id="category">
 <option value="all">All</option>
 <option value="image">Image</option>
 <option value="coding">Coding</option>
 <option value="productivity">Productivity</option>
 <option value="presentation">Presentation</option>
-<option value="video">Video</option>
 </select>
+
 <button onclick="applyFilter()">Apply</button>
 
-<h3>Recommend</h3>
+<h3>🎯 Need Help?</h3>
 <select id="goal">
-<option value="content">Content</option>
+<option value="content">Writing / Content</option>
 <option value="coding">Coding</option>
 <option value="research">Research</option>
 <option value="design">Design</option>
 </select>
-<button onclick="recommend()">Get AI Picks</button>
+
+<button onclick="recommend()">Show Best Tools</button>
+
 <div id="recommendations"></div>
 
-<h3>Actions</h3>
-<button onclick="downloadCSV()">Download CSV</button>
+<h3>📥 Download</h3>
+<button onclick="downloadCSV()">Download Data</button>
 <button onclick="window.print()">Download PDF</button>
 
 </div>
 
 <div class="content">
 
-<h2>Dashboard</h2>
-<button onclick="sortByScore()">Sort by Score</button>
-<button onclick="sortByPrice()">Sort by Price</button>
+<h2>✨ Start Your AI Journey</h2>
 
-<canvas id="chart" width="700" height="300"></canvas>
+<div class="card">
+AI is not here to replace you — it is here to <b>assist you</b>.  
+Start small. Explore. Experiment. You’ll be surprised how easy it is.
+</div>
 
 <div id="tools"></div>
-
-<h2>Insights</h2>
-<div class="card">
-<p><b>Trend:</b> AI tools are shifting toward multi-modal + agent workflows.</p>
-<p><b>Insight:</b> Free tools offer 80% capability for beginners.</p>
-<p><b>Recommendation:</b> Use ChatGPT + Perplexity combo for max value.</p>
-</div>
 
 </div>
 
@@ -84,74 +121,88 @@ a{color:#38bdf8;text-decoration:none;}
 
 <script>
 
-// ===== LOGIN =====
-function login(){
-let name=prompt("Enter your name");
-if(name){localStorage.setItem("user",name);updateUser();}
+// ===== TOOL DATA =====
+const tools = [
+{
+name:"ChatGPT",
+cat:"productivity",
+link:"https://chat.openai.com",
+freeLink:"https://chat.openai.com",
+inr:1600,
+free:"Chat, writing, Q&A",
+paid:"Advanced AI, images, better accuracy",
+strength:"Most versatile AI",
+weak:"Sometimes incorrect answers"
+},
+{
+name:"Claude",
+cat:"productivity",
+link:"https://claude.ai",
+freeLink:"https://claude.ai",
+inr:1600,
+free:"Writing, summaries",
+paid:"Large documents, better reasoning",
+strength:"Best writing quality",
+weak:"Less features"
+},
+{
+name:"Perplexity",
+cat:"productivity",
+link:"https://perplexity.ai",
+freeLink:"https://perplexity.ai",
+inr:1600,
+free:"AI search",
+paid:"Deep research tools",
+strength:"Best research tool",
+weak:"Less creative"
+},
+{
+name:"Midjourney",
+cat:"image",
+link:"https://midjourney.com",
+freeLink:"https://midjourney.com",
+inr:800,
+free:"No free plan",
+paid:"High quality images",
+strength:"Best art generation",
+weak:"No free access"
+},
+{
+name:"Canva AI",
+cat:"presentation",
+link:"https://canva.com",
+freeLink:"https://canva.com",
+inr:800,
+free:"Design templates",
+paid:"Premium templates",
+strength:"Very easy to use",
+weak:"Basic AI"
 }
-function logout(){localStorage.removeItem("user");updateUser();}
-function updateUser(){
-let u=localStorage.getItem("user");
-document.getElementById("userInfo").innerText=u?"👤 "+u:"Not logged in";
-}
-
-// ===== DATA =====
-const tools=[
-{name:"ChatGPT",cat:"productivity",price:20,free:true,feat:95,ease:90,perf:95,innov:95,best:["content","research"],link:"https://chat.openai.com"},
-{name:"Claude",cat:"productivity",price:20,free:true,feat:92,ease:92,perf:94,innov:90,best:["content"],link:"https://claude.ai"},
-{name:"Perplexity",cat:"productivity",price:20,free:true,feat:88,ease:90,perf:90,innov:88,best:["research"],link:"https://perplexity.ai"},
-{name:"Midjourney",cat:"image",price:10,free:false,feat:95,ease:70,perf:96,innov:90,best:["design"],link:"https://midjourney.com"},
-{name:"Ideogram",cat:"image",price:0,free:true,feat:90,ease:88,perf:90,innov:85,best:["design"],link:"https://ideogram.ai"},
-{name:"Cursor",cat:"coding",price:20,free:false,feat:95,ease:88,perf:95,innov:92,best:["coding"],link:"https://cursor.sh"},
-{name:"Copilot",cat:"coding",price:10,free:false,feat:92,ease:92,perf:94,innov:90,best:["coding"],link:"https://github.com/copilot"},
-{name:"Canva AI",cat:"presentation",price:10,free:true,feat:90,ease:95,perf:88,innov:85,best:["design"],link:"https://canva.com"},
-{name:"Gamma",cat:"presentation",price:8,free:true,feat:88,ease:90,perf:85,innov:85,best:["content"],link:"https://gamma.app"},
-{name:"Veo 3.1",cat:"video",price:0,free:true,feat:92,ease:85,perf:90,innov:92,best:["design"],link:"#"}
 ];
-
-// ===== SCORE =====
-function score(t){
-return Math.round(t.feat*0.3+(t.free?100:70)*0.2+(100-t.price*2)*0.15+t.ease*0.1+t.perf*0.15+t.innov*0.1);
-}
-tools.forEach(t=>t.score=score(t));
-
-let current=[...tools];
 
 // ===== RENDER =====
 function render(list){
 let html="";
 list.forEach(t=>{
-html+=`<div class="card">
-<span class="score">${t.score}</span>
-<h3><a href="${t.link}" target="_blank">${t.name}</a></h3>
-${t.best.map(b=>`<span class="tag">${b}</span>`).join("")}
-<p>$${t.price}/mo</p>
-<button onclick="save('${t.name}')">⭐ Save</button>
-</div>`;
+html+=`
+<div class="card">
+
+<h3>${t.name}</h3>
+
+<p><b>🔗 Try Free:</b> <a href="${t.freeLink}" target="_blank">Open Tool</a></p>
+
+<p><b>🆓 Free:</b> ${t.free}</p>
+<p><b>💰 Paid (₹${t.inr}/month):</b> ${t.paid}</p>
+
+<p><b>✅ Strength:</b> ${t.strength}</p>
+<p><b>❌ Weakness:</b> ${t.weak}</p>
+
+<button onclick="downloadGuide('${t.name}')">📘 Beginner Guide</button>
+
+</div>
+`;
 });
 document.getElementById("tools").innerHTML=html;
-drawChart(list);
-}
-
-// ===== CHART =====
-function drawChart(list){
-let c=document.getElementById("chart").getContext("2d");
-c.clearRect(0,0,700,300);
-let max=Math.max(...list.map(t=>t.score));
-list.forEach((t,i)=>{
-let x=i*80+20;
-let h=(t.score/max)*200;
-c.fillStyle="#38bdf8";
-c.fillRect(x,250-h,40,h);
-c.fillText(t.name,x,270);
-});
-}
-
-// ===== FILTER =====
-function applyFilter(){
-let cat=document.getElementById("category").value;
-current=cat==="all"?tools:tools.filter(t=>t.cat===cat);
-render(current);
 }
 
 // ===== SEARCH =====
@@ -160,33 +211,26 @@ let q=document.getElementById("search").value.toLowerCase();
 render(tools.filter(t=>t.name.toLowerCase().includes(q)));
 }
 
-// ===== SORT =====
-function sortByScore(){current.sort((a,b)=>b.score-a.score);render(current);}
-function sortByPrice(){current.sort((a,b)=>a.price-b.price);render(current);}
+// ===== FILTER =====
+function applyFilter(){
+let cat=document.getElementById("category").value;
+if(cat==="all") render(tools);
+else render(tools.filter(t=>t.cat===cat));
+}
 
 // ===== RECOMMEND =====
 function recommend(){
 let goal=document.getElementById("goal").value;
-let ranked=tools.map(t=>{
-let s=t.score+(t.best.includes(goal)?20:0);
-return {...t,final:s};
-}).sort((a,b)=>b.final-a.final);
-
-let html="<h4>Top Picks</h4>";
-ranked.slice(0,3).forEach(t=>html+=`<p>${t.name} (${t.final})</p>`);
+let list=tools.filter(t=>t.cat===goal || t.strength.toLowerCase().includes(goal));
+let html="<h4>Top Picks:</h4>";
+list.forEach(t=> html+=`<p>${t.name}</p>`);
 document.getElementById("recommendations").innerHTML=html;
-}
-
-// ===== SAVE =====
-function save(name){
-let s=JSON.parse(localStorage.getItem("saved")||"[]");
-if(!s.includes(name)){s.push(name);localStorage.setItem("saved",JSON.stringify(s));alert("Saved");}
 }
 
 // ===== CSV =====
 function downloadCSV(){
-let csv="Name,Category,Score\n";
-tools.forEach(t=>csv+=`${t.name},${t.cat},${t.score}\n`);
+let csv="Name,Category,Price(INR)\n";
+tools.forEach(t=>csv+=`${t.name},${t.cat},${t.inr}\n`);
 let blob=new Blob([csv]);
 let a=document.createElement("a");
 a.href=URL.createObjectURL(blob);
@@ -194,9 +238,33 @@ a.download="ai-tools.csv";
 a.click();
 }
 
+// ===== BEGINNER GUIDE =====
+function downloadGuide(name){
+
+let text = `
+${name} Beginner Guide
+
+1. Open the tool
+2. Look for input box
+3. Type your request
+4. Press enter
+5. Review results
+
+Tips:
+- Be clear in your instructions
+- Experiment with prompts
+- Use it daily to learn faster
+`;
+
+let blob=new Blob([text],{type:"text/plain"});
+let a=document.createElement("a");
+a.href=URL.createObjectURL(blob);
+a.download=name+"_guide.txt";
+a.click();
+}
+
 // INIT
-updateUser();
-render(current);
+render(tools);
 
 </script>
 
