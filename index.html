@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>AIForAll — Learn & Use AI Easily</title>
+<title>AIForAll — Global AI Learning Platform</title>
 
 <style>
 body {
@@ -13,17 +13,17 @@ body {
 }
 
 header {
-  padding:20px;
-  font-size:24px;
+  padding:25px;
+  font-size:26px;
   font-weight:bold;
-  background:white;
   text-align:center;
+  background:white;
 }
 
 .container {display:flex;height:100vh;}
 
 .sidebar {
-  width:300px;
+  width:320px;
   background:white;
   padding:20px;
   overflow:auto;
@@ -31,7 +31,7 @@ header {
 
 .content {
   flex:1;
-  padding:20px;
+  padding:25px;
   overflow:auto;
 }
 
@@ -51,44 +51,35 @@ button,select,input {
   box-shadow:0 4px 12px rgba(0,0,0,0.1);
 }
 
-.score {
-  float:right;
-  background:#22c55e;
-  color:white;
-  padding:5px 10px;
-  border-radius:8px;
+.selected {border:2px solid #2563eb;}
+
+.progress {
+  height:10px;
+  background:#e5e7eb;
+  border-radius:5px;
+  margin:10px 0;
 }
 
-a {color:#2563eb;}
+.progress-bar {
+  height:10px;
+  background:#22c55e;
+  border-radius:5px;
+  width:0%;
+}
 </style>
-
 </head>
 
 <body>
 
-<header>🌍 AIForAll — Your Friendly Guide to AI (2026)</header>
+<header>🌍 AIForAll — Learn AI Step by Step</header>
 
 <div class="container">
 
 <div class="sidebar">
 
-<h3>🔍 Search</h3>
-<input id="search" placeholder="Search tools..." oninput="searchTools()">
-
-<h3>📂 Category</h3>
-<select id="category">
-<option value="all">All</option>
-<option value="image">Image</option>
-<option value="coding">Coding</option>
-<option value="productivity">Productivity</option>
-<option value="presentation">Presentation</option>
-</select>
-
-<button onclick="applyFilter()">Apply</button>
-
-<h3>🎯 Need Help?</h3>
+<h3>🎯 What do you want help with?</h3>
 <select id="goal">
-<option value="content">Writing / Content</option>
+<option value="content">Writing</option>
 <option value="coding">Coding</option>
 <option value="research">Research</option>
 <option value="design">Design</option>
@@ -98,22 +89,31 @@ a {color:#2563eb;}
 
 <div id="recommendations"></div>
 
-<h3>📥 Download</h3>
-<button onclick="downloadCSV()">Download Data</button>
-<button onclick="window.print()">Download PDF</button>
+<h3>📘 Learning Mode</h3>
+<button onclick="startLearning()">Start Guided Learning</button>
+
+<div class="progress">
+<div id="progressBar" class="progress-bar"></div>
+</div>
+
+<h3>📥 Guides</h3>
+<button id="wordBtn" disabled onclick="downloadGuide('word')">Download Word</button>
+<button id="pdfBtn" disabled onclick="downloadGuide('pdf')">Download PDF</button>
 
 </div>
 
 <div class="content">
 
-<h2>✨ Start Your AI Journey</h2>
+<h2>✨ Welcome to AIForAll</h2>
 
 <div class="card">
-AI is not here to replace you — it is here to <b>assist you</b>.  
-Start small. Explore. Experiment. You’ll be surprised how easy it is.
+This platform helps you learn AI step-by-step.  
+No experience needed. Just curiosity.
 </div>
 
 <div id="tools"></div>
+
+<div id="learningBox" class="card" style="display:none;"></div>
 
 </div>
 
@@ -121,145 +121,106 @@ Start small. Explore. Experiment. You’ll be surprised how easy it is.
 
 <script>
 
-// ===== TOOL DATA =====
+// ===== DATA =====
 const tools = [
-{
-name:"ChatGPT",
-cat:"productivity",
-link:"https://chat.openai.com",
-freeLink:"https://chat.openai.com",
-inr:1600,
-free:"Chat, writing, Q&A",
-paid:"Advanced AI, images, better accuracy",
-strength:"Most versatile AI",
-weak:"Sometimes incorrect answers"
-},
-{
-name:"Claude",
-cat:"productivity",
-link:"https://claude.ai",
-freeLink:"https://claude.ai",
-inr:1600,
-free:"Writing, summaries",
-paid:"Large documents, better reasoning",
-strength:"Best writing quality",
-weak:"Less features"
-},
-{
-name:"Perplexity",
-cat:"productivity",
-link:"https://perplexity.ai",
-freeLink:"https://perplexity.ai",
-inr:1600,
-free:"AI search",
-paid:"Deep research tools",
-strength:"Best research tool",
-weak:"Less creative"
-},
-{
-name:"Midjourney",
-cat:"image",
-link:"https://midjourney.com",
-freeLink:"https://midjourney.com",
-inr:800,
-free:"No free plan",
-paid:"High quality images",
-strength:"Best art generation",
-weak:"No free access"
-},
-{
-name:"Canva AI",
-cat:"presentation",
-link:"https://canva.com",
-freeLink:"https://canva.com",
-inr:800,
-free:"Design templates",
-paid:"Premium templates",
-strength:"Very easy to use",
-weak:"Basic AI"
-}
+{name:"ChatGPT",cat:"content"},
+{name:"Claude",cat:"content"},
+{name:"Perplexity",cat:"research"},
+{name:"Midjourney",cat:"design"},
+{name:"Cursor",cat:"coding"}
 ];
+
+let selectedTool=null;
+let learningStep=0;
 
 // ===== RENDER =====
 function render(list){
 let html="";
 list.forEach(t=>{
 html+=`
-<div class="card">
-
+<div class="card" onclick="selectTool('${t.name}', this)">
 <h3>${t.name}</h3>
-
-<p><b>🔗 Try Free:</b> <a href="${t.freeLink}" target="_blank">Open Tool</a></p>
-
-<p><b>🆓 Free:</b> ${t.free}</p>
-<p><b>💰 Paid (₹${t.inr}/month):</b> ${t.paid}</p>
-
-<p><b>✅ Strength:</b> ${t.strength}</p>
-<p><b>❌ Weakness:</b> ${t.weak}</p>
-
-<button onclick="downloadGuide('${t.name}')">📘 Beginner Guide</button>
-
-</div>
-`;
+</div>`;
 });
 document.getElementById("tools").innerHTML=html;
 }
 
-// ===== SEARCH =====
-function searchTools(){
-let q=document.getElementById("search").value.toLowerCase();
-render(tools.filter(t=>t.name.toLowerCase().includes(q)));
-}
+// ===== SELECT =====
+function selectTool(name,el){
+selectedTool=name;
+document.querySelectorAll(".card").forEach(c=>c.classList.remove("selected"));
+el.classList.add("selected");
 
-// ===== FILTER =====
-function applyFilter(){
-let cat=document.getElementById("category").value;
-if(cat==="all") render(tools);
-else render(tools.filter(t=>t.cat===cat));
+document.getElementById("wordBtn").disabled=false;
+document.getElementById("pdfBtn").disabled=false;
 }
 
 // ===== RECOMMEND =====
 function recommend(){
 let goal=document.getElementById("goal").value;
-let list=tools.filter(t=>t.cat===goal || t.strength.toLowerCase().includes(goal));
-let html="<h4>Top Picks:</h4>";
-list.forEach(t=> html+=`<p>${t.name}</p>`);
+let list=tools.filter(t=>t.cat===goal);
+
+let html="<h4>Top Picks</h4>";
+list.forEach(t=>{
+html+=`<div class="card" onclick="selectTool('${t.name}', this)">${t.name}</div>`;
+});
 document.getElementById("recommendations").innerHTML=html;
 }
 
-// ===== CSV =====
-function downloadCSV(){
-let csv="Name,Category,Price(INR)\n";
-tools.forEach(t=>csv+=`${t.name},${t.cat},${t.inr}\n`);
-let blob=new Blob([csv]);
-let a=document.createElement("a");
-a.href=URL.createObjectURL(blob);
-a.download="ai-tools.csv";
-a.click();
+// ===== LEARNING MODE =====
+function startLearning(){
+if(!selectedTool){
+alert("Select a tool first");
+return;
 }
 
-// ===== BEGINNER GUIDE =====
-function downloadGuide(name){
+learningStep=0;
+document.getElementById("learningBox").style.display="block";
+nextStep();
+}
 
-let text = `
-${name} Beginner Guide
+function nextStep(){
 
-1. Open the tool
-2. Look for input box
-3. Type your request
-4. Press enter
-5. Review results
+const steps=[
+"Step 1: Open the tool website",
+"Step 2: Find the input box",
+"Step 3: Type your first request",
+"Step 4: Review output",
+"Step 5: Try improving your prompt"
+];
 
-Tips:
-- Be clear in your instructions
-- Experiment with prompts
-- Use it daily to learn faster
+if(learningStep < steps.length){
+document.getElementById("learningBox").innerHTML = `
+<h3>${selectedTool} Learning</h3>
+<p>${steps[learningStep]}</p>
+<button onclick="nextStep()">Next</button>
 `;
 
-let blob=new Blob([text],{type:"text/plain"});
+document.getElementById("progressBar").style.width =
+((learningStep+1)/steps.length)*100 + "%";
+
+learningStep++;
+}else{
+document.getElementById("learningBox").innerHTML =
+"<h3>🎉 You’ve completed the basics!</h3>";
+}
+}
+
+// ===== DOWNLOAD =====
+function downloadGuide(type){
+
+let content=`${selectedTool} Guide
+
+Follow steps:
+1. Open tool
+2. Enter prompt
+3. Improve results
+`;
+
+let blob=new Blob([content]);
 let a=document.createElement("a");
 a.href=URL.createObjectURL(blob);
-a.download=name+"_guide.txt";
+a.download=selectedTool+"_guide."+ (type==="word"?"doc":"pdf");
 a.click();
 }
 
